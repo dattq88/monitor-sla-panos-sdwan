@@ -40,9 +40,12 @@ def get_api_key(ip, username, password):
         else:
             error_msg = root.find('.//msg').text
             logging.error(f"Loi khi lay API Key: {error_msg}")
+            logging.error(f"Response loi tu Firewall:\n{response.text}")
             return None
     except requests.exceptions.RequestException as e:
         logging.error(f"Da xay ra loi request khi lay API Key: {e}")
+        if e.response:
+             logging.error(f"Response loi tu Firewall:\n{e.response.text}")
         return None
 
 # --- PHAN 2: CAC HAM LAY THONG TIN SD-WAN ---
@@ -52,6 +55,7 @@ def get_sdwan_stats_as_json(ip, key):
     cmd_xml = "<show><sdwan><path-monitor><stats></stats></path-monitor></sdwan></show>"
     url = f"https://{ip}/api/?type=op&cmd={cmd_xml}&key={key}"
     try:
+        logging.info(f"Dang thuc thi lenh XML: {cmd_xml}")
         logging.info("Dang gui yeu cau lay thong tin SD-WAN path monitor...")
         response = requests.get(url, verify=False, timeout=15)
         response.raise_for_status()
@@ -64,9 +68,12 @@ def get_sdwan_stats_as_json(ip, key):
         else:
             error_msg = parsed_dict.get('response', {}).get('result', {}).get('msg', 'Khong ro loi.')
             logging.error(f"Loi khi thuc thi lenh 'path-monitor stats': {error_msg}")
+            logging.error(f"Response loi tu Firewall:\n{response.text}")
             return None
     except requests.exceptions.RequestException as e:
         logging.error(f"Da xay ra loi request khi lay thong tin 'path-monitor stats': {e}")
+        if e.response:
+             logging.error(f"Response loi tu Firewall:\n{e.response.text}")
         return None
 
 def get_sdwan_connections_as_json(ip, key):
@@ -74,6 +81,7 @@ def get_sdwan_connections_as_json(ip, key):
     cmd_xml = "<show><sdwan><connection><all></all></connection></sdwan></show>"
     url = f"https://{ip}/api/?type=op&cmd={cmd_xml}&key={key}"
     try:
+        logging.info(f"Dang thuc thi lenh XML: {cmd_xml}")
         logging.info("Dang gui yeu cau lay thong tin SD-WAN connection all...")
         response = requests.get(url, verify=False, timeout=15)
         response.raise_for_status()
@@ -86,9 +94,12 @@ def get_sdwan_connections_as_json(ip, key):
         else:
             error_msg = parsed_dict.get('response', {}).get('result', {}).get('msg', 'Khong ro loi.')
             logging.error(f"Loi khi thuc thi lenh 'connection all': {error_msg}")
+            logging.error(f"Response loi tu Firewall:\n{response.text}")
             return None
     except requests.exceptions.RequestException as e:
         logging.error(f"Da xay ra loi request khi lay thong tin 'connection all': {e}")
+        if e.response:
+             logging.error(f"Response loi tu Firewall:\n{e.response.text}")
         return None
 
 # --- PHAN 3: KHOI THUC THI CHINH ---
