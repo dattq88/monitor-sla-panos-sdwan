@@ -1,0 +1,39 @@
+=======================================================
+ KET QUA: SHOW VPN FLOW (JSON)
+=======================================================
+{
+  "dp": "dp0",
+  "num_ipsec": "2",
+  "num_sslvpn": "0",
+  "IPSec": {
+    "entry": [
+      {
+        "name": "tl_0101_007951000682274_0101",
+        "id": "1",
+        "gwid": "1",
+        "inner-if": "tunnel.900",
+        "outer-if": "ethernet1/1",
+        "ipsec-mode": "tunnel",
+        "localip": "99.98.202.253",
+        "peerip": "99.98.202.254",
+        "state": "active",
+        "mon": "up",
+        "owner": "1"
+      },
+      {
+        "name": "tl_0102_007951000682274_0102",
+        "id": "2",
+        "gwid": "2",
+        "inner-if": "tunnel.901",
+        "outer-if": "ethernet1/2",
+        "ipsec-mode": "tunnel",
+        "localip": "10.10.2.49",
+        "peerip": "0.0.0.0",
+        "state": "init",
+        "mon": "down",
+        "owner": "1"
+      }
+    ]
+  },
+  "total": "2"
+}
