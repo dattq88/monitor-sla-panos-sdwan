@@ -1,0 +1,73 @@
+{
+  "entry": {
+    "slot_dp": "slot1 dp0",
+    "stats_list": {
+      "entry": [
+        {
+          "is_v6": "0",
+          "state": "down",
+          "state_reason": "DOWN/ping",
+          "state_change": "959",
+          "state_reason_idx": "2",
+          "if_name": "ethernet1/1",
+          "vif_name": "sdwan.901",
+          "conn_id": "0",
+          "if_id": "16",
+          "latency": "0",
+          "jitter": "0",
+          "loss": "22",
+          "profile": "N/A",
+          "policy": "0"
+        },
+        {
+          "is_v6": "0",
+          "state": "down",
+          "state_reason": "DOWN/init",
+          "state_change": "0",
+          "state_reason_idx": "0",
+          "if_name": "ethernet1/2",
+          "vif_name": "sdwan.901",
+          "conn_id": "1",
+          "if_id": "17",
+          "latency": "0",
+          "jitter": "0",
+          "loss": "0",
+          "profile": "N/A",
+          "policy": "0"
+        },
+        {
+          "is_v6": "0",
+          "state": "down",
+          "state_reason": "DOWN/path_monitor",
+          "state_change": "968",
+          "state_reason_idx": "3",
+          "if_name": "tl_0101_007951000682274_0101",
+          "vif_name": "sdwan.903",
+          "conn_id": "2",
+          "if_id": "256",
+          "latency": "0",
+          "jitter": "0",
+          "loss": "22",
+          "profile": "N/A",
+          "policy": "0"
+        },
+        {
+          "is_v6": "0",
+          "state": "down",
+          "state_reason": "DOWN/init",
+          "state_change": "0",
+          "state_reason_idx": "0",
+          "if_name": "tl_0102_007951000682274_0102",
+          "vif_name": "sdwan.903",
+          "conn_id": "3",
+          "if_id": "257",
+          "latency": "0",
+          "jitter": "0",
+          "loss": "0",
+          "profile": "N/A",
+          "policy": "0"
+        }
+      ]
+    }
+  }
+}
