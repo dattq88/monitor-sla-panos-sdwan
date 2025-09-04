@@ -48,7 +48,7 @@ def get_api_key(ip, username, password):
              logging.error(f"Response loi tu Firewall:\n{e.response.text}")
         return None
 
-# --- PHAN 2: CAC HAM LAY THONG TIN SD-WAN ---
+# --- PHAN 2: CAC HAM LAY THONG TIN ---
 
 def get_sdwan_stats_as_json(ip, key):
     """Thuc thi lenh 'show sdwan path-monitor stats' va tra ve ket qua duoi dang chuoi JSON."""
@@ -76,28 +76,28 @@ def get_sdwan_stats_as_json(ip, key):
              logging.error(f"Response loi tu Firewall:\n{e.response.text}")
         return None
 
-def get_sdwan_connections_as_json(ip, key):
-    """Thuc thi lenh 'show sdwan connection all' va tra ve ket qua duoi dang chuoi JSON."""
-    cmd_xml = "<show><sdwan><connection><all></all></connection></sdwan></show>"
+def get_vpn_flow_as_json(ip, key):
+    """Thuc thi lenh 'show vpn flow' va tra ve ket qua duoi dang chuoi JSON."""
+    cmd_xml = "<show><vpn><flow></flow></vpn></show>"
     url = f"https://{ip}/api/?type=op&cmd={cmd_xml}&key={key}"
     try:
         logging.info(f"Dang thuc thi lenh XML: {cmd_xml}")
-        logging.info("Dang gui yeu cau lay thong tin SD-WAN connection all...")
+        logging.info("Dang gui yeu cau lay thong tin VPN flow...")
         response = requests.get(url, verify=False, timeout=15)
         response.raise_for_status()
         parsed_dict = xmltodict.parse(response.text)
         if parsed_dict.get('response', {}).get('@status') == 'success':
-            logging.info("Thuc thi lenh 'connection all' thanh cong. Dang chuyen doi sang JSON...")
+            logging.info("Thuc thi lenh 'vpn flow' thanh cong. Dang chuyen doi sang JSON...")
             result_data = parsed_dict.get('response', {}).get('result', {})
             json_output = json.dumps(result_data, indent=2, ensure_ascii=False)
             return json_output
         else:
             error_msg = parsed_dict.get('response', {}).get('result', {}).get('msg', 'Khong ro loi.')
-            logging.error(f"Loi khi thuc thi lenh 'connection all': {error_msg}")
+            logging.error(f"Loi khi thuc thi lenh 'vpn flow': {error_msg}")
             logging.error(f"Response loi tu Firewall:\n{response.text}")
             return None
     except requests.exceptions.RequestException as e:
-        logging.error(f"Da xay ra loi request khi lay thong tin 'connection all': {e}")
+        logging.error(f"Da xay ra loi request khi lay thong tin 'vpn flow': {e}")
         if e.response:
              logging.error(f"Response loi tu Firewall:\n{e.response.text}")
         return None
@@ -130,11 +130,11 @@ if __name__ == "__main__":
             print(sdwan_stats_json)
 
         # Thuc thi va in ket qua lenh thu hai
-        sdwan_connections_json = get_sdwan_connections_as_json(FIREWALL_IP, api_key)
-        if sdwan_connections_json:
+        vpn_flow_json = get_vpn_flow_as_json(FIREWALL_IP, api_key)
+        if vpn_flow_json:
             print("\n" + "="*55)
-            print(" KET QUA: SHOW SDWAN CONNECTION ALL (JSON)")
+            print(" KET QUA: SHOW VPN FLOW (JSON)")
             print("="*55)
-            print(sdwan_connections_json)
+            print(vpn_flow_json)
 
     logging.info("--- Kich ban hoan tat. ---")
