@@ -1,32 +1,32 @@
 # -*- coding: utf-8 -*-
 import requests
-import xmltodict  # Dùng để chuyển đổi XML sang Dictionary
-import json       # Dùng để làm việc với JSON
+import xmltodict  # Dung de chuyen doi XML sang Dictionary
+import json       # Dung de lam viec voi JSON
 import xml.etree.ElementTree as ET
 import urllib3
 import logging
 
-# Tắt các cảnh báo về SSL certificate không an toàn
+# Tat cac canh bao ve SSL certificate khong an toan
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-# --- PHẦN 1: CÁC HÀM CÀI ĐẶT VÀ XÁC THỰC ---
+# --- PHAN 1: CAC HAM CAI DAT VA XAC THUC ---
 
 def setup_logging():
     """
-    Thiết lập hệ thống logging để chỉ hiển thị trên console.
+    Thiet lap he thong logging de chi hien thi tren console.
     """
-    # Xóa các handlers cũ nếu có để tránh ghi log lặp lại
+    # Xoa cac handlers cu neu co de tranh ghi log lap lai
     for handler in logging.root.handlers[:]:
         logging.root.removeHandler(handler)
 
-    # Cấu hình logging cơ bản để chỉ in ra console
+    # Cau hinh logging co ban de chi in ra console
     logging.basicConfig(level=logging.INFO,
                         format='%(asctime)s - %(levelname)s - %(message)s',
                         datefmt='%Y-%m-%d %H:%M:%S',
                         handlers=[logging.StreamHandler()])
 
 def get_api_key(ip, username, password):
-    """Lấy API key bằng phương thức POST để bảo mật thông tin đăng nhập."""
+    """Lay API key bang phuong thuc POST de bao mat thong tin dang nhap."""
     url = f"https://{ip}/api/?type=keygen"
     payload = {'user': username, 'password': password}
     try:
@@ -35,64 +35,64 @@ def get_api_key(ip, username, password):
         root = ET.fromstring(response.text)
         if root.get('status') == 'success':
             api_key = root.find('.//key').text
-            logging.info("Lấy API Key thành công!")
+            logging.info("Lay API Key thanh cong!")
             return api_key
         else:
             error_msg = root.find('.//msg').text
-            logging.error(f"Lỗi khi lấy API Key: {error_msg}")
+            logging.error(f"Loi khi lay API Key: {error_msg}")
             return None
     except requests.exceptions.RequestException as e:
-        logging.error(f"Đã xảy ra lỗi request khi lấy API Key: {e}")
+        logging.error(f"Da xay ra loi request khi lay API Key: {e}")
         return None
 
-# --- PHẦN 2: HÀM LẤY THÔNG TIN SD-WAN ---
+# --- PHAN 2: HAM LAY THONG TIN SD-WAN ---
 
 def get_sdwan_stats_as_json(ip, key):
-    """Thực thi lệnh 'show sd-wan path-monitor stats' và trả về kết quả dưới dạng chuỗi JSON."""
+    """Thuc thi lenh 'show sd-wan path-monitor stats' va tra ve ket qua duoi dang chuoi JSON."""
     cmd_xml = "<show><sd-wan><path-monitor><stats></stats></path-monitor></sd-wan></show>"
     url = f"https://{ip}/api/?type=op&cmd={cmd_xml}&key={key}"
     try:
-        logging.info("Đang gửi yêu cầu lấy thông tin SD-WAN path monitor...")
+        logging.info("Dang gui yeu cau lay thong tin SD-WAN path monitor...")
         response = requests.get(url, verify=False, timeout=15)
         response.raise_for_status()
         parsed_dict = xmltodict.parse(response.text)
         if parsed_dict.get('response', {}).get('@status') == 'success':
-            logging.info("Thực thi lệnh thành công. Đang chuyển đổi sang JSON...")
+            logging.info("Thuc thi lenh thanh cong. Dang chuyen doi sang JSON...")
             result_data = parsed_dict.get('response', {}).get('result', {})
             json_output = json.dumps(result_data, indent=2, ensure_ascii=False)
             return json_output
         else:
-            error_msg = parsed_dict.get('response', {}).get('result', {}).get('msg', 'Không rõ lỗi.')
-            logging.error(f"Lỗi khi thực thi lệnh SD-WAN: {error_msg}")
+            error_msg = parsed_dict.get('response', {}).get('result', {}).get('msg', 'Khong ro loi.')
+            logging.error(f"Loi khi thuc thi lenh SD-WAN: {error_msg}")
             return None
     except requests.exceptions.RequestException as e:
-        logging.error(f"Đã xảy ra lỗi request khi lấy thông tin SD-WAN: {e}")
+        logging.error(f"Da xay ra loi request khi lay thong tin SD-WAN: {e}")
         return None
 
-# --- PHẦN 3: KHỐI THỰC THI CHÍNH ---
+# --- PHAN 3: KHOI THUC THI CHINH ---
 
 if __name__ == "__main__":
-    # Thiết lập logging
+    # Thiet lap logging
     setup_logging()
 
-    # --- THAY ĐỔI CÁC THÔNG SỐ NÀY ---
-    FIREWALL_IP = "192.168.1.1"      # Thay bằng IP của firewall
-    USERNAME    = "admin"                # Thay bằng username có quyền API
-    PASSWORD    = "your_password"        # Thay bằng mật khẩu
+    # --- THAY DOI CAC THONG SO NAY ---
+    FIREWALL_IP = "192.168.1.1"      # Thay bang IP cua firewall
+    USERNAME    = "admin"                # Thay bang username co quyen API
+    PASSWORD    = "your_password"        # Thay bang mat khau
     # ------------------------------------
 
-    logging.info(f"--- Bắt đầu kịch bản trên Firewall {FIREWALL_IP} ---")
+    logging.info(f"--- Bat dau kich ban tren Firewall {FIREWALL_IP} ---")
     
-    # 1. Lấy API Key
+    # 1. Lay API Key
     api_key = get_api_key(FIREWALL_IP, USERNAME, PASSWORD)
     
-    # 2. Nếu có API Key, thực thi lệnh và in kết quả
+    # 2. Neu co API Key, thuc thi lenh va in ket qua
     if api_key:
         sdwan_stats_json = get_sdwan_stats_as_json(FIREWALL_IP, api_key)
         if sdwan_stats_json:
             print("\n" + "="*55)
-            print(" KẾT QUẢ SD-WAN STATS (ĐỊNH DẠNG JSON)")
+            print(" KET QUA SD-WAN STATS (DINH DANG JSON)")
             print("="*55)
             print(sdwan_stats_json)
 
-    logging.info("--- Kịch bản hoàn tất. ---")
+    logging.info("--- Kich ban hoan tat. ---")
