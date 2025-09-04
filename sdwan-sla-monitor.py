@@ -45,11 +45,11 @@ def get_api_key(ip, username, password):
         logging.error(f"Da xay ra loi request khi lay API Key: {e}")
         return None
 
-# --- PHAN 2: HAM LAY THONG TIN SD-WAN ---
+# --- PHAN 2: CAC HAM LAY THONG TIN SD-WAN ---
 
 def get_sdwan_stats_as_json(ip, key):
-    """Thuc thi lenh 'show sd-wan path-monitor stats' va tra ve ket qua duoi dang chuoi JSON."""
-    cmd_xml = "<show><sd-wan><path-monitor><stats></stats></path-monitor></sd-wan></show>"
+    """Thuc thi lenh 'show sdwan path-monitor stats' va tra ve ket qua duoi dang chuoi JSON."""
+    cmd_xml = "<show><sdwan><path-monitor><stats></stats></path-monitor></sdwan></show>"
     url = f"https://{ip}/api/?type=op&cmd={cmd_xml}&key={key}"
     try:
         logging.info("Dang gui yeu cau lay thong tin SD-WAN path monitor...")
@@ -57,16 +57,38 @@ def get_sdwan_stats_as_json(ip, key):
         response.raise_for_status()
         parsed_dict = xmltodict.parse(response.text)
         if parsed_dict.get('response', {}).get('@status') == 'success':
-            logging.info("Thuc thi lenh thanh cong. Dang chuyen doi sang JSON...")
+            logging.info("Thuc thi lenh 'path-monitor stats' thanh cong. Dang chuyen doi sang JSON...")
             result_data = parsed_dict.get('response', {}).get('result', {})
             json_output = json.dumps(result_data, indent=2, ensure_ascii=False)
             return json_output
         else:
             error_msg = parsed_dict.get('response', {}).get('result', {}).get('msg', 'Khong ro loi.')
-            logging.error(f"Loi khi thuc thi lenh SD-WAN: {error_msg}")
+            logging.error(f"Loi khi thuc thi lenh 'path-monitor stats': {error_msg}")
             return None
     except requests.exceptions.RequestException as e:
-        logging.error(f"Da xay ra loi request khi lay thong tin SD-WAN: {e}")
+        logging.error(f"Da xay ra loi request khi lay thong tin 'path-monitor stats': {e}")
+        return None
+
+def get_sdwan_connections_as_json(ip, key):
+    """Thuc thi lenh 'show sdwan connection all' va tra ve ket qua duoi dang chuoi JSON."""
+    cmd_xml = "<show><sdwan><connection><all></all></connection></sdwan></show>"
+    url = f"https://{ip}/api/?type=op&cmd={cmd_xml}&key={key}"
+    try:
+        logging.info("Dang gui yeu cau lay thong tin SD-WAN connection all...")
+        response = requests.get(url, verify=False, timeout=15)
+        response.raise_for_status()
+        parsed_dict = xmltodict.parse(response.text)
+        if parsed_dict.get('response', {}).get('@status') == 'success':
+            logging.info("Thuc thi lenh 'connection all' thanh cong. Dang chuyen doi sang JSON...")
+            result_data = parsed_dict.get('response', {}).get('result', {})
+            json_output = json.dumps(result_data, indent=2, ensure_ascii=False)
+            return json_output
+        else:
+            error_msg = parsed_dict.get('response', {}).get('result', {}).get('msg', 'Khong ro loi.')
+            logging.error(f"Loi khi thuc thi lenh 'connection all': {error_msg}")
+            return None
+    except requests.exceptions.RequestException as e:
+        logging.error(f"Da xay ra loi request khi lay thong tin 'connection all': {e}")
         return None
 
 # --- PHAN 3: KHOI THUC THI CHINH ---
@@ -86,13 +108,22 @@ if __name__ == "__main__":
     # 1. Lay API Key
     api_key = get_api_key(FIREWALL_IP, USERNAME, PASSWORD)
     
-    # 2. Neu co API Key, thuc thi lenh va in ket qua
+    # 2. Neu co API Key, thuc thi cac lenh va in ket qua
     if api_key:
+        # Thuc thi va in ket qua lenh thu nhat
         sdwan_stats_json = get_sdwan_stats_as_json(FIREWALL_IP, api_key)
         if sdwan_stats_json:
             print("\n" + "="*55)
-            print(" KET QUA SD-WAN STATS (DINH DANG JSON)")
+            print(" KET QUA: SHOW SDWAN PATH-MONITOR STATS (JSON)")
             print("="*55)
             print(sdwan_stats_json)
+
+        # Thuc thi va in ket qua lenh thu hai
+        sdwan_connections_json = get_sdwan_connections_as_json(FIREWALL_IP, api_key)
+        if sdwan_connections_json:
+            print("\n" + "="*55)
+            print(" KET QUA: SHOW SDWAN CONNECTION ALL (JSON)")
+            print("="*55)
+            print(sdwan_connections_json)
 
     logging.info("--- Kich ban hoan tat. ---")
